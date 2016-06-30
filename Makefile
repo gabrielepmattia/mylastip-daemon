@@ -51,6 +51,8 @@ CCADMIN=CCadmin
 CFLAGS = -Wall -O2 -lcurl -lm
 CC = gcc
 
+MAIN_EXECUTABLE_NAME = mylastipd
+
 default: mylastipd
 
 # build
@@ -65,6 +67,7 @@ build: .build-post
 
 # clean
 clean: .clean-post
+	rm -rvf *.o $(MAIN_EXECUTABLE_NAME)
 
 .clean-pre:
 # Add your pre 'clean' code here...
@@ -123,11 +126,14 @@ help: .help-post
 # Add your post 'help' code here...
 
 ## Rules
+cJSON.o: cJSON.min.c cJSON.h
+	$(CC) $(CFLAGS) cJSON.c -c
+
 mylastipd.o: mylastipd.c mylastipd.h common.h
 	$(CC) $(CFLAGS) mylastipd.c -c
 
-mylastipd: mylastipd.o
-	$(CC) $(CFLAGS) mylastipd.o -o mylastipd
+mylastipd: mylastipd.o cJSON.o
+	$(CC) $(CFLAGS) mylastipd.o cJSON.o -o $(MAIN_EXECUTABLE_NAME)
 
 # include project implementation makefile
 include nbproject/Makefile-impl.mk
