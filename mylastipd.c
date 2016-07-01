@@ -22,6 +22,12 @@
  * Created on June 20, 2016, 3:30 PM
  */
 
+/*
+ * Seen:
+ *  - https://curl.haxx.se/libcurl/c/getinmemory.html
+ *  - https://curl.haxx.se/libcurl/c/http-post.html
+ */
+
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include <sys/errno.h>
@@ -32,8 +38,31 @@
 #include "cJSON.h"
 #include "utils.h"
 
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *) userdata;
+
+    mem->memory = realloc(mem->memory, mem->size + realsize + 1);
+    if (mem->memory == NULL) {
+        /* out of memory! */
+        printf("not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+
+    memcpy(&(mem->memory[mem->size]), ptr, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
+}
+
 int main(int argc, char** argv) {
-    fprintf(stderr, "[%s][INFO] Starting MyLasytIPd\n", getTime());
+    fprintf(stderr, "[%s][INFO] Starting MyLasytIPd | by gabry3795 - gabry dot gabry at hotmail.it\n", getTime());
 
     // Perfom reading with descriptor, we will know how many bytes we have to read..
     int file_desc = open(SETTING_FILENAME, O_RDONLY);
@@ -49,10 +78,10 @@ int main(int argc, char** argv) {
     // Start reading
     int bytes_read = 0;
     long bytes_left = filesize;
-    char* buf = (char*) malloc(filesize * sizeof (char));
+    char* setting_file_str = (char*) malloc(filesize * sizeof (char));
     int ret;
     while (bytes_left) {
-        ret = read(file_desc, buf + bytes_read, bytes_left);
+        ret = read(file_desc, setting_file_str + bytes_read, bytes_left);
         // File ends
         if (ret == 0) break;
         if (ret == -1) {
@@ -64,48 +93,71 @@ int main(int argc, char** argv) {
         bytes_left -= ret;
     }
     close(file_desc);
-    printf("Read content is:\n%s", buf);
+    fprintf(stderr, "[%s][INFO] Setting file succesfully read\n", getTime());
+    fprintf(stderr, "[%s][INFO] Parsing JSON in setting file\n", getTime());
+    // Parse JSON
+    cJSON* root = cJSON_Parse(setting_file_str);
+    free(setting_file_str);
+    char* key = root->child->valuestring;
+    int delay = root->child->next->valueint;
+    fprintf(stderr, "[%s][INFO] ==> Given key is %s\n", getTime(), key);
+    fprintf(stderr, "[%s][INFO] ==> Given delay is %ds\n", getTime(), delay);
+    // Start web loop
+    fprintf(stderr, "[%s][INFO] Starting web loop with delay given\n", getTime());
+    struct MemoryStruct response_data;
+    while (1) {
+        fprintf(stderr, "=========================== Main L O O P ===========================\n");
+        CURL *curl;
+        CURLcode res;
 
-    /*
-    char buf[2048];
-    char* setting_file = (char*)malloc(5024*sizeof(char));
-    
-    // Read the configuration file once
-    FILE* fp = fopen("test.json", "r");
-    if(fp == NULL) fprintf(stderr,"[ERROR] No setting file\n");
-    
-    int bytes_read = 0;
-    while(fgets(buf, sizeof(buf), fp)) {
-        sprintf(setting_file + bytes_read, buf);
-        bytes_read += strlen(buf);
+        response_data.memory = malloc(1); /* will be grown as needed by the realloc above */
+        response_data.size = 0;
+
+        // In windows, this will init the winsock stuff
+        curl_global_init(CURL_GLOBAL_ALL);
+
+        // get a curl handle
+        curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8080/api/check_in");
+            // Now specify the POST data
+
+            // Prepare the string
+            fprintf(stderr, "[%s][INFO] Preparing the query string\n", getTime());
+            char* post_string = (char*) malloc(1000 * sizeof (char));
+            sprintf(post_string, "key=%s&delay=%d", key, delay);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_string);
+
+            // Change to output function of curl
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &response_data);
+
+            // Perform the request, res will get the return code
+            fprintf(stderr, "[%s][INFO] Sending data to server\n", getTime());
+            res = curl_easy_perform(curl);
+
+            // Check for errors
+            if (res != CURLE_OK)
+                fprintf(stderr, "[%s][ERROR] Unable to send data to server :: %s\n", getTime(), curl_easy_strerror(res));
+                //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            else
+                fprintf(stderr, "[%s][INFO] OK! Response received :: %s\n", getTime(), response_data.memory);
+
+            /* How to get IP from cURL
+            char* ip;
+            curl_easy_getinfo(curl, CURLINFO_LOCAL_IP, &ip);
+            printf("Local ip %s\n", ip);
+             */
+
+            // always cleanup 
+            curl_easy_cleanup(curl);
+            free(post_string);
+            free(response_data.memory);
+        }
+        curl_global_cleanup();
+        fprintf(stderr, "[%s][INFO] Sleeping for %ds\n", getTime(), delay);
+        sleep(delay);
     }
-    fclose(fp);
-    
-    printf("Read \n%s", setting_file);
-     */ /*
-    CURL *curl;
-    CURLcode res;
 
-    // In windows, this will init the winsock stuff
-    curl_global_init(CURL_GLOBAL_ALL);
-
-    // get a curl handle
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "http://local");
-        // Now specify the POST data
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
-        // Perform the request, res will get the return code
-        res = curl_easy_perform(curl);
-        // Check for errors
-        if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
-
-        // always cleanup 
-        curl_easy_cleanup(curl);
-    }
-    curl_global_cleanup();
-    */
     return (EXIT_SUCCESS);
 }

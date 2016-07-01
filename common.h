@@ -39,7 +39,7 @@ extern "C" {
     
 #define PORT_NO 5400
 #define HOSTNAME "127.0.0.1"
-#define SETTING_FILENAME "test.json" 
+#define SETTING_FILENAME "settings.json" 
 #define DEBUG 1
 
     
