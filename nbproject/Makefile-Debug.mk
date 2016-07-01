@@ -38,7 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/_http-post.o \
 	${OBJECTDIR}/_old_sockimpl.o \
 	${OBJECTDIR}/cJSON.o \
-	${OBJECTDIR}/mylastipd.o
+	${OBJECTDIR}/mylastipd.o \
+	${OBJECTDIR}/utils.o
 
 
 # C Compiler Flags
@@ -84,6 +85,11 @@ ${OBJECTDIR}/mylastipd.o: mylastipd.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/mylastipd.o mylastipd.c
+
+${OBJECTDIR}/utils.o: utils.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/utils.o utils.c
 
 # Subprojects
 .build-subprojects:

@@ -17,7 +17,7 @@
 
 /* 
  * File:   common.h
- * Author: gaby3795 <gabry dot gabry at hotmail dot com>
+ * Author: gaby3795 <gabry dot gabry at hotmail.it>
  *
  * Created on June 20, 2016, 4:13 PM
  */
@@ -25,15 +25,24 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+    
+    
 #define PORT_NO 5400
 #define HOSTNAME "127.0.0.1"
-  
+#define SETTING_FILENAME "test.json" 
 #define DEBUG 1
 
+    
 
 #ifdef __cplusplus
 }

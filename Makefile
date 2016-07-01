@@ -126,14 +126,17 @@ help: .help-post
 # Add your post 'help' code here...
 
 ## Rules
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) utils.c -c
+
 cJSON.o: cJSON.min.c cJSON.h
 	$(CC) $(CFLAGS) cJSON.c -c
 
 mylastipd.o: mylastipd.c mylastipd.h common.h
 	$(CC) $(CFLAGS) mylastipd.c -c
 
-mylastipd: mylastipd.o cJSON.o
-	$(CC) $(CFLAGS) mylastipd.o cJSON.o -o $(MAIN_EXECUTABLE_NAME)
+mylastipd: mylastipd.o cJSON.o utils.o
+	$(CC) $(CFLAGS) mylastipd.o cJSON.o utils.o -o $(MAIN_EXECUTABLE_NAME)
 
 # include project implementation makefile
 include nbproject/Makefile-impl.mk
