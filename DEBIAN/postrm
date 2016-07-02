@@ -1,0 +1,9 @@
+#!/bin/sh
+#echo "Removing startup condition.."
+#sed -i '/MyLastIp/d' /etc/init.d/rc.local
+#sed -i '/mylastip/d' /etc/init.d/rc.local
+
+printf "\n REMOVE COMPLETE"
+printf "\n Thank you for using MyLastIp\n\n"
+
+exit 0

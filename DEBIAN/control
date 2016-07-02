@@ -1,0 +1,10 @@
+Package: mylastip
+Version: 2.0-1
+Section: base
+Priority: optional
+Architecture: all
+Depends: curl
+Maintainer: gabry3795 <gabry.gabry@hotmail.it>
+Description: MyLastIp Daemon
+ Register first at http://www.tuttodinternet.com/mylastip
+ then put the settings.json file in /etc/mylastip

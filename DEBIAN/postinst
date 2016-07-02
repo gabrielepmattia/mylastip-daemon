@@ -1,0 +1,14 @@
+#!/bin/sh
+echo "Setting permissions.."
+
+chmod +x /usr/bin/mylastipd
+chmod +x /etc/init.d/mylastipd
+chown root:root /etc/init.d/mylastipd
+
+printf "\n !PLEASE! Now put your settings.json in /etc/mylastip"
+printf "\n Then reboot your system or do sudo service mylastipd start"
+printf "\n If you don't have a key register free at tuttodinternet.com/mylastip"
+printf "\n\n Thank you for installing MyLastIp"
+printf "\n by gabry3795 - gabry.gabry <at> hotmail.it\n\n"
+
+exit 0
