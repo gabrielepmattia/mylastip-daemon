@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         // get a curl handle
         curl = curl_easy_init();
         if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8080/api/check_in");
+            curl_easy_setopt(curl, CURLOPT_URL, settings->server);
             // Now specify the POST data
 
             // Prepare the string
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &response_data);
 
             // Perform the request, res will get the return code
-            fprintf(stderr, "[%s][INFO] Sending data to server\n", getTime());
+            fprintf(stderr, "[%s][INFO] Sending data to server %s\n", getTime(), settings->server);
             res = curl_easy_perform(curl);
 
             // Check for errors
@@ -166,5 +166,12 @@ settings_t* check_parsed_data(cJSON* root) {
     fprintf(stderr, "[%s][INFO] ==> Given server is %s\n", getTime(), settings->server);
     fprintf(stderr, "[%s][INFO] ==> Given key is %s\n", getTime(), settings->key);
     fprintf(stderr, "[%s][INFO] ==> Given delay is %ds\n", getTime(), settings->delay);
+    
+    // Prepare server address
+    char* server_addr = (char*)malloc(2000*sizeof(char));
+    sprintf(server_addr, "%s/api/check-in",settings->server);
+    free(settings->server);
+    if(realloc(server_addr, strlen(server_addr)));
+    settings->server = server_addr;
     return settings;
 }
