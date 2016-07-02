@@ -37,62 +37,11 @@
 #include "common.h"
 #include "cJSON.h"
 #include "utils.h"
-
-struct MemoryStruct {
-    char *memory;
-    size_t size;
-};
-
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    size_t realsize = size * nmemb;
-    struct MemoryStruct *mem = (struct MemoryStruct *) userdata;
-
-    mem->memory = realloc(mem->memory, mem->size + realsize + 1);
-    if (mem->memory == NULL) {
-        /* out of memory! */
-        printf("not enough memory (realloc returned NULL)\n");
-        return 0;
-    }
-
-    memcpy(&(mem->memory[mem->size]), ptr, realsize);
-    mem->size += realsize;
-    mem->memory[mem->size] = 0;
-
-    return realsize;
-}
+#include "mylastipd.h"
 
 int main(int argc, char** argv) {
     fprintf(stderr, "[%s][INFO] Starting MyLasytIPd | by gabry3795 - gabry dot gabry at hotmail.it\n", getTime());
-
-    // Perfom reading with descriptor, we will know how many bytes we have to read..
-    int file_desc = open(SETTING_FILENAME, O_RDONLY);
-    if (file_desc < 0) {
-        fprintf(stderr, "[%s][ERROR] Setting file not found at %s. Exiting...\n", getTime(), SETTING_FILENAME);
-        exit(EXIT_FAILURE);
-    }
-    // Get the filesize
-    struct stat st;
-    stat(SETTING_FILENAME, &st);
-    ssize_t filesize = st.st_size;
-    fprintf(stderr, "[%s][INFO] %s size is: %ld bytes\n", getTime(), SETTING_FILENAME, filesize);
-    // Start reading
-    int bytes_read = 0;
-    long bytes_left = filesize;
-    char* setting_file_str = (char*) malloc(filesize * sizeof (char));
-    int ret;
-    while (bytes_left) {
-        ret = read(file_desc, setting_file_str + bytes_read, bytes_left);
-        // File ends
-        if (ret == 0) break;
-        if (ret == -1) {
-            if (errno == EINTR) continue;
-            fprintf(stderr, "[%s][ERROR] There was an error reading the setting file at %s. Exiting...\n", getTime(), SETTING_FILENAME);
-            exit(EXIT_FAILURE);
-        }
-        bytes_read += ret;
-        bytes_left -= ret;
-    }
-    close(file_desc);
+    char* setting_file_str = read_file(SETTING_FILENAME);
     fprintf(stderr, "[%s][INFO] Setting file succesfully read\n", getTime());
     fprintf(stderr, "[%s][INFO] Parsing JSON in setting file\n", getTime());
     // Parse JSON
@@ -160,4 +109,37 @@ int main(int argc, char** argv) {
     }
 
     return (EXIT_SUCCESS);
+}
+
+char* read_file(char* file_path){
+    // Perfom reading with descriptor, we will know how many bytes we have to read..
+    int file_desc = open(SETTING_FILENAME, O_RDONLY);
+    if (file_desc < 0) {
+        fprintf(stderr, "[%s][ERROR] Setting file not found at %s. Exiting...\n", getTime(), file_path);
+        exit(EXIT_FAILURE);
+    }
+    // Get the filesize
+    struct stat st;
+    stat(SETTING_FILENAME, &st);
+    ssize_t filesize = st.st_size;
+    fprintf(stderr, "[%s][INFO] %s size is: %ld bytes\n", getTime(), file_path, filesize);
+    // Read
+    int bytes_read = 0;
+    long bytes_left = filesize;
+    char* setting_file_str = (char*) malloc(filesize * sizeof (char));
+    int ret;
+    while (bytes_left) {
+        ret = read(file_desc, setting_file_str + bytes_read, bytes_left);
+        // File ends
+        if (ret == 0) break;
+        if (ret == -1) {
+            if (errno == EINTR) continue;
+            fprintf(stderr, "[%s][ERROR] There was an error reading the setting file at %s. Exiting...\n", getTime(), file_path);
+            exit(EXIT_FAILURE);
+        }
+        bytes_read += ret;
+        bytes_left -= ret;
+    }
+    close(file_desc);
+    return setting_file_str;
 }

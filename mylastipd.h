@@ -18,7 +18,8 @@
 extern "C" {
 #endif
 
-
+    
+char* read_file(char* file_path);
 
 
 #ifdef __cplusplus

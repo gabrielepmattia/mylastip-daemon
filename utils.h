@@ -5,7 +5,7 @@
  */
 
 /* 
- * File:   common.h
+ * File:   utils.h
  * Author: gaby3795 <gabry dot gabry at hotmail.it>
  *
  * Created on June 20, 2016, 4:13 PM
@@ -17,10 +17,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
     
 char* getTime();
 
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
 
 #ifdef __cplusplus
 }

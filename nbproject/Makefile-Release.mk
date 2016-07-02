@@ -35,8 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_http-post.o \
-	${OBJECTDIR}/_old_sockimpl.o \
 	${OBJECTDIR}/cJSON.o \
 	${OBJECTDIR}/mylastipd.o \
 	${OBJECTDIR}/utils.o
@@ -65,16 +63,6 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/mylastipdaemon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/mylastipdaemon ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/_http-post.o: _http-post.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_http-post.o _http-post.c
-
-${OBJECTDIR}/_old_sockimpl.o: _old_sockimpl.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_old_sockimpl.o _old_sockimpl.c
 
 ${OBJECTDIR}/cJSON.o: cJSON.c 
 	${MKDIR} -p ${OBJECTDIR}
