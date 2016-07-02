@@ -21,6 +21,12 @@ extern "C" {
     
 char* read_file(char* file_path);
 
+typedef struct settings{
+    char* server;       // Server name provided
+    char* key;          // Key provided
+    int delay;          // Delay provided
+} settings_t;
+settings_t* check_parsed_data(cJSON* root);
 
 #ifdef __cplusplus
 }

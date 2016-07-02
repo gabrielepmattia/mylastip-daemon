@@ -42,17 +42,15 @@
 int main(int argc, char** argv) {
     fprintf(stderr, "[%s][INFO] Starting MyLasytIPd | by gabry3795 - gabry dot gabry at hotmail.it\n", getTime());
     char* setting_file_str = read_file(SETTING_FILENAME);
-    fprintf(stderr, "[%s][INFO] Setting file succesfully read\n", getTime());
     fprintf(stderr, "[%s][INFO] Parsing JSON in setting file\n", getTime());
-    // Parse JSON
+    // Parse JSON and check it
     cJSON* root = cJSON_Parse(setting_file_str);
+    settings_t* settings = check_parsed_data(root);
+    // Clean before loop
     free(setting_file_str);
-    char* key = root->child->valuestring;
-    int delay = root->child->next->valueint;
-    fprintf(stderr, "[%s][INFO] ==> Given key is %s\n", getTime(), key);
-    fprintf(stderr, "[%s][INFO] ==> Given delay is %ds\n", getTime(), delay);
+    free(root);
     // Start web loop
-    fprintf(stderr, "[%s][INFO] Starting web loop with delay given\n", getTime());
+    fprintf(stderr, "[%s][INFO] Starting web loop with data given\n", getTime());
     struct MemoryStruct response_data;
     while (1) {
         fprintf(stderr, "=========================== Main L O O P ===========================\n");
@@ -74,7 +72,7 @@ int main(int argc, char** argv) {
             // Prepare the string
             fprintf(stderr, "[%s][INFO] Preparing the query string\n", getTime());
             char* post_string = (char*) malloc(1000 * sizeof (char));
-            sprintf(post_string, "key=%s&delay=%d", key, delay);
+            sprintf(post_string, "key=%s&delay=%d", settings->key, settings->delay);
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_string);
 
             // Change to output function of curl
@@ -104,14 +102,14 @@ int main(int argc, char** argv) {
             free(response_data.memory);
         }
         curl_global_cleanup();
-        fprintf(stderr, "[%s][INFO] Sleeping for %ds\n", getTime(), delay);
-        sleep(delay);
+        fprintf(stderr, "[%s][INFO] Sleeping for %ds\n", getTime(), settings->delay);
+        sleep(settings->delay);
     }
 
     return (EXIT_SUCCESS);
 }
 
-char* read_file(char* file_path){
+char* read_file(char* file_path) {
     // Perfom reading with descriptor, we will know how many bytes we have to read..
     int file_desc = open(SETTING_FILENAME, O_RDONLY);
     if (file_desc < 0) {
@@ -141,5 +139,32 @@ char* read_file(char* file_path){
         bytes_left -= ret;
     }
     close(file_desc);
+    fprintf(stderr, "[%s][INFO] Setting file succesfully read\n", getTime());
     return setting_file_str;
+}
+
+/**
+ * Parse settings
+ */
+settings_t* check_parsed_data(cJSON* root) {
+    fprintf(stderr, "[%s][INFO] Checking parsed data\n", getTime());
+    settings_t* settings = (settings_t*) malloc(sizeof (settings_t));
+    // Parse the entire tree
+    cJSON* current_child = root->child;
+    while (current_child) {
+        if (!strcmp(current_child->string, "server")) settings->server = current_child->valuestring;
+        if (!strcmp(current_child->string, "key")) settings->key = current_child->valuestring;
+        if (!strcmp(current_child->string, "delay")) settings->delay = current_child->valueint;
+        current_child = current_child->next;
+    }
+    if (!settings->server || !settings->key || !settings->delay) {
+        if (!settings->server) fprintf(stderr, "[%s][ERROR] ==> Server not provided. Exiting...\n", getTime());
+        if (!settings->key) fprintf(stderr, "[%s][ERROR] ==> Key not provided. Exiting...\n", getTime());
+        if (!settings->delay) fprintf(stderr, "[%s][ERROR] ==> Delay not provided. Exiting...\n", getTime());
+        exit(EXIT_FAILURE);
+    }
+    fprintf(stderr, "[%s][INFO] ==> Given server is %s\n", getTime(), settings->server);
+    fprintf(stderr, "[%s][INFO] ==> Given key is %s\n", getTime(), settings->key);
+    fprintf(stderr, "[%s][INFO] ==> Given delay is %ds\n", getTime(), settings->delay);
+    return settings;
 }
