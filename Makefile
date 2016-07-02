@@ -130,7 +130,7 @@ utils.o: utils.c utils.h
 	$(CC) $(CFLAGS) utils.c -c
 
 cJSON.o: cJSON.min.c cJSON.h
-	$(CC) $(CFLAGS) cJSON.c -c
+	$(CC) $(CFLAGS) cJSON.min.c -c -o cJSON.o
 
 mylastipd.o: mylastipd.c mylastipd.h common.h
 	$(CC) $(CFLAGS) mylastipd.c -c
