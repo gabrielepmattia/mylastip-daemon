@@ -34,15 +34,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
     
-    
-#define PORT_NO 5400
-#define HOSTNAME "127.0.0.1"
+ 
 #define SETTING_FILENAME "settings.json" 
+#define MINIMUM_DELAY 60
 #define DEBUG 1
 
-    
 
 #ifdef __cplusplus
 }

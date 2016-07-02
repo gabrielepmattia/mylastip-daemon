@@ -25,6 +25,8 @@ typedef struct settings{
     char* server;       // Server name provided
     char* key;          // Key provided
     int delay;          // Delay provided
+    // Machine data
+    char* uname;
 } settings_t;
 settings_t* check_parsed_data(cJSON* root);
 

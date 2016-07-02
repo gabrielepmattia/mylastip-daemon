@@ -32,6 +32,7 @@
 #include <sys/fcntl.h>
 #include <sys/errno.h>
 
+#include <sys/utsname.h>
 #include <curl/curl.h>
 
 #include "common.h"
@@ -70,9 +71,11 @@ int main(int argc, char** argv) {
             // Now specify the POST data
 
             // Prepare the string
-            fprintf(stderr, "[%s][INFO] Preparing the query string\n", getTime());
-            char* post_string = (char*) malloc(1000 * sizeof (char));
-            sprintf(post_string, "key=%s&delay=%d", settings->key, settings->delay);
+            fprintf(stderr, "[%s][INFO] Preparing the query string... ", getTime());
+            char* post_string = (char*) malloc(2000 * sizeof (char));
+            sprintf(post_string, "key=%s&delay=%d&uname=%s", settings->key, settings->delay, settings->uname);
+            if (realloc(post_string, strlen(post_string)));
+            fprintf(stderr, "of %d bytes, to send\n", (int)strlen(post_string));
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_string);
 
             // Change to output function of curl
@@ -139,7 +142,7 @@ char* read_file(char* file_path) {
         bytes_left -= ret;
     }
     close(file_desc);
-    fprintf(stderr, "[%s][INFO] Setting file succesfully read\n", getTime());
+    fprintf(stderr, "[%s][INFO] Setting file successfully read\n", getTime());
     return setting_file_str;
 }
 
@@ -163,15 +166,33 @@ settings_t* check_parsed_data(cJSON* root) {
         if (!settings->delay) fprintf(stderr, "[%s][ERROR] ==> Delay not provided. Exiting...\n", getTime());
         exit(EXIT_FAILURE);
     }
-    fprintf(stderr, "[%s][INFO] ==> Given server is %s\n", getTime(), settings->server);
-    fprintf(stderr, "[%s][INFO] ==> Given key is %s\n", getTime(), settings->key);
-    fprintf(stderr, "[%s][INFO] ==> Given delay is %ds\n", getTime(), settings->delay);
-    
+    fprintf(stderr, "[%s][INFO] ==> Given server is: %s\n", getTime(), settings->server);
+    fprintf(stderr, "[%s][INFO] ==> Given key is: %s\n", getTime(), settings->key);
+    fprintf(stderr, "[%s][INFO] ==> Given delay is: %ds\n", getTime(), settings->delay);
+
     // Prepare server address
-    char* server_addr = (char*)malloc(2000*sizeof(char));
-    sprintf(server_addr, "%s/api/check-in",settings->server);
+    char* server_addr = (char*) malloc(2000 * sizeof (char));
+    sprintf(server_addr, "%s/api/check_in", settings->server);
     free(settings->server);
-    if(realloc(server_addr, strlen(server_addr)));
+    if (realloc(server_addr, strlen(server_addr)));
     settings->server = server_addr;
+
+    // Check delay
+    if (settings->delay < MINIMUM_DELAY) {
+        settings->delay = MINIMUM_DELAY;
+        fprintf(stderr, "[%s][WARNING] ==> Delay is below the minimum delay allowed (%ds), so it was set to %ds\n", getTime(), MINIMUM_DELAY, MINIMUM_DELAY);
+    }
+
+    // Get machine data
+    // Get uname
+    settings->uname = '\0';
+    char* uname_str = (char*) malloc(2000 * sizeof (char));
+    struct utsname buffer;
+    if (!uname(&buffer)) {
+        sprintf(uname_str, "%s#%s#%s#%s", buffer.sysname, buffer.nodename, buffer.release, buffer.machine);
+        if (realloc(uname_str, strlen(uname_str)));
+        settings->uname = uname_str;
+        fprintf(stderr, "[%s][INFO] ==> uname is: %s\n", getTime(), settings->uname);
+    }
     return settings;
 }
