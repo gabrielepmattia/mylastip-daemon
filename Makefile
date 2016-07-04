@@ -45,11 +45,15 @@
 
 
 # Environment 
-MKDIR=mkdir
-CP=cp
-CCADMIN=CCadmin
+MKDIR = mkdir
+CP = cp
+CCADMIN = CCadmin
 CFLAGS = -Wall -O2 -lcurl -lm
 CC = gcc
+
+## Read version from control file
+VERSION=$(shell grep "Version" DEBIAN/control | sed "s/\Version: //g")
+PACKAGE=$(shell grep "Package" DEBIAN/control | sed "s/\Package: //g")
 
 MAIN_EXECUTABLE_NAME = mylastipd
 
@@ -68,6 +72,7 @@ build: .build-post
 # clean
 clean: .clean-post
 	rm -rvf *.o $(MAIN_EXECUTABLE_NAME)
+	rm -rvf _out
 
 .clean-pre:
 # Add your pre 'clean' code here...
@@ -137,6 +142,16 @@ mylastipd.o: mylastipd.c mylastipd.h common.h
 
 mylastipd: mylastipd.o cJSON.o utils.o
 	$(CC) $(CFLAGS) mylastipd.o cJSON.o utils.o -o $(MAIN_EXECUTABLE_NAME)
+
+## Make the .deb
+package: mylastipd
+	cp -f ./$(MAIN_EXECUTABLE_NAME) root/usr/bin
+	cp -rf root/ $(PACKAGE)$(VERSION)/
+	cp -rf DEBIAN $(PACKAGE)$(VERSION)/DEBIAN
+	dpkg-deb --build $(PACKAGE)$(VERSION)/
+	mkdir -p _out
+	mv $(PACKAGE)$(VERSION).deb _out/
+	rm -r $(PACKAGE)$(VERSION)
 
 # include project implementation makefile
 include nbproject/Makefile-impl.mk
