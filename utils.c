@@ -6,6 +6,7 @@ char* getTime() {
     time_t t = time(NULL);
     struct tm * p = localtime(&t);
     strftime(s, 30, "%c", p);
+    if (realloc(s, strlen(s)));
     return s;
 }
 
