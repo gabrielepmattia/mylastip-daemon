@@ -36,7 +36,7 @@ extern "C" {
 #endif
     
  
-#define SETTING_FILENAME "settings.json" 
+#define SETTING_FILENAME "/etc/mylastip/settings.json" 
 #define MINIMUM_DELAY 60
 #define DEBUG 1
 
