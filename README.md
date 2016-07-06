@@ -16,6 +16,6 @@ MyLastIP is an online service that allows you to see the last IP of your Linux (
 If you don't manage to see the machine IP on [MyLastIP online WebApp](http://mylastip-tuttodinternet.rhcloud.com/) just do `sudo service mylastip status` to see the log or just hit in the terminal `mylastipd`, then Ctrl-C to exit. Log will tell you where is the problem.
 
 # This git
-This is the source of the daemon logs the machine ip to [MyLastIP online WebApp](http://mylastip-tuttodinternet.rhcloud.com/).
+This is the source of the daemon that logs the machine ip to [MyLastIP online WebApp](http://mylastip-tuttodinternet.rhcloud.com/).
 ## Building
 Just `make` or `sudo make package` if you want to build the .deb (Makefile will put it in *_out/*)
