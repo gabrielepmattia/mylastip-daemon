@@ -3,7 +3,7 @@ Version: 2.0-1
 Section: base
 Priority: optional
 Architecture: all
-Depends: curl
+Depends: curl daemon
 Maintainer: gabry3795 <gabry.gabry@hotmail.it>
 Description: MyLastIp Daemon
  Register first at http://www.tuttodinternet.com/mylastip
